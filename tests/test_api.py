@@ -9,6 +9,11 @@ from isegrader_api import create_app
 
 @pytest.fixture()
 def app(tmp_path):
+    description_dir = tmp_path / "graderfiles"
+    description_dir.mkdir()
+    for question_id in range(1, 6):
+        (description_dir / str(question_id)).write_bytes(b"%PDF-1.4 seeded")
+
     resource_dir = tmp_path / "resourcefiles"
     resource_dir.mkdir()
     (resource_dir / "00_intro_2024-1832-17229153700352.pdf").write_bytes(b"%PDF-1.4 resource")
@@ -19,7 +24,7 @@ def app(tmp_path):
             "SECRET_KEY": "test-secret",
             "JWT_SECRET_KEY": "test-jwt-secret-with-at-least-32-bytes",
             "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
-            "DESCRIPTION_DIR": str(tmp_path / "graderfiles"),
+            "DESCRIPTION_DIR": str(description_dir),
             "RESOURCE_DIR": str(resource_dir),
             "AUTO_CREATE_DB": True,
             "SEED_DATABASE": True,
@@ -87,9 +92,11 @@ def test_getquestion_creates_progress_rows(client, auth_headers):
 
     assert response.status_code == 200
     assert response.get_json() == [
-        {"id": 1, "name": "Sum Two Numbers", "progress": 0},
-        {"id": 2, "name": "FizzBuzz", "progress": 0},
-        {"id": 3, "name": "Reverse String", "progress": 0},
+        {"id": 1, "name": "Arabic Numerals", "progress": 0},
+        {"id": 2, "name": "USDate", "progress": 0},
+        {"id": 3, "name": "NDigits", "progress": 0},
+        {"id": 4, "name": "WeeklySales", "progress": 0},
+        {"id": 5, "name": "Next15Days", "progress": 0},
     ]
 
 
@@ -118,7 +125,7 @@ def test_testcases_are_decoded(client):
     response = client.get("/problems/gettestcase/1")
 
     assert response.status_code == 200
-    assert response.get_json()[0] == {"item1": "1 2", "item2": "3"}
+    assert response.get_json()[0] == {"item1": "0", "item2": "0 --> zero"}
 
 
 def test_seeded_question_description_is_available(client):
@@ -143,7 +150,7 @@ def test_postquestion_stores_description_file(client):
     )
     assert response.status_code == 200
 
-    response = client.get("/description/4")
+    response = client.get("/description/6")
     assert response.status_code == 200
     assert response.mimetype == "application/pdf"
     assert response.get_data() == b"%PDF-1.4 test"
