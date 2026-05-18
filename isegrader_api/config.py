@@ -49,6 +49,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     DESCRIPTION_DIR = os.environ.get("DESCRIPTION_DIR", str(BASE_DIR / "instance" / "graderfiles"))
+    RESOURCE_DIR = os.environ.get("RESOURCE_DIR", str(BASE_DIR / "instance" / "resourcefiles"))
     CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "*")
     AUTO_CREATE_DB = _env_bool("AUTO_CREATE_DB", True)
     SEED_DATABASE = _env_bool("SEED_DATABASE", True)
